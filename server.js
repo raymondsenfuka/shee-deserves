@@ -1,12 +1,20 @@
 import express from "express";
 import fetch from "node-fetch";
 import dotenv from "dotenv";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
+
 app.use(express.json());
 
-// AI Chat route
+// ✅ Allow your GitHub Pages frontend to call the backend
+app.use(cors({
+  origin: "https://raymondsenfuka.github.io",   // allow your GitHub Pages
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
+
 app.post("/ask", async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -18,7 +26,7 @@ app.post("/ask", async (req, res) => {
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",   // lightweight & fast model
+        model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompt }],
       }),
     });
@@ -32,4 +40,6 @@ app.post("/ask", async (req, res) => {
   }
 });
 
-app.listen(3000, () => console.log("✅ Backend running on port 3000"));
+// ✅ Use dynamic port for Render
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`✅ Backend running on port ${PORT}`));
